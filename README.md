@@ -1,2 +1,2 @@
-# FSDLT
-File System Distributed Ledger Technology
+# AURA
+Adaptive Unified Reputation Algorithm
