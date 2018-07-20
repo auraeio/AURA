@@ -1,0 +1,45 @@
+import testing ;
+import modules ;
+
+BOOST_ROOT = [ modules.peek : BOOST_ROOT ] ;
+use-project /boost : $(BOOST_ROOT) ;
+use-project /btdht : .. ;
+
+GTEST_ROOT = ../btutils/vendor/gtest-1.6.0 ;
+GMOCK_ROOT = ../btutils/vendor/gmock-1.6.0 ;
+
+lib pthread : : <name>pthread <link>shared ;
+
+project
+	: requirements
+	<source>UnitTestUDPSocket.cpp
+	<source>$(GTEST_ROOT)/src/gtest-all.cc
+	<source>$(GMOCK_ROOT)/src/gmock-all.cc
+	<source>$(GMOCK_ROOT)/src/gmock_main.cc
+#	<define>ENABLE_SRP=1
+	<library>/btdht//btdht/<link>static
+	<library>/boost//system/<link>static
+	<target-os>linux:<library>pthread
+
+	<include>$(GTEST_ROOT)/include
+	<include>$(GMOCK_ROOT)/include
+	<include>$(GTEST_ROOT)
+	<include>$(GMOCK_ROOT)
+	<toolset>gcc:<define>GTEST_USE_OWN_TR1_TUPLE=1
+	<toolset>darwin:<define>GTEST_USE_OWN_TR1_TUPLE=1
+
+	<include>../src
+	<include>/opt/local/include
+	
+	<toolset>gcc:<linkflags>-pthread
+	<toolset>clang:<cxxflags>-Wall
+	<toolset>clang:<cxxflags>-Wno-invalid-source-encoding
+	<toolset>clang:<cxxflags>-Wno-multichar
+	<toolset>clang:<cxxflags>-Wno-unused-private-field
+#	<warnings-as-errors>on
+	;
+
+unit-test unittests : TestDhtID.cpp TestSecureDhtID.cpp TestDataStore.cpp
+	TestDhtImpl.cpp TestDhtImplSpeed.cpp TestRoutingTable.cpp
+	TestDhtImplResponse.cpp TestDHTMessageObject.cpp TestExternalIPCounter.cpp
+	TestDHTRoutingTable.cpp ;
