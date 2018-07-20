@@ -1,0 +1,23 @@
+import testing ;
+import feature : feature ;
+
+lib boost-system : : <target-os>darwin <name>boost_system-mt <search>/opt/local/lib : : <include>/opt/local/include ;
+lib boost-system : : <name>boost_system ;
+
+project
+	: requirements
+	<source>../src/city.cc
+	<source>../src/ip_set.cpp
+	<library>boost-system
+	<include>../src
+	: default-build
+;
+
+test-suite dht-bootstrap :
+	[ run test_mapped_file.cpp ]
+	[ run test_mapped_vector.cpp ]
+	[ run test_ip_set.cpp ]
+	[ run test_node_buffer.cpp ]
+	[ run test_ping_queue.cpp ]
+;
+
