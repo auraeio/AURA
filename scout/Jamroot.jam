@@ -1,0 +1,102 @@
+import feature : feature ;
+import modules ;
+import os ;
+import path ;
+
+BOOST_ROOT = [ modules.peek : BOOST_ROOT ] ;
+SODIUM_ROOT = [ modules.peek : SODIUM_ROOT ] ;
+
+if (BOOST_ROOT)
+{
+	ECHO "building boost from source directory: " $(BOOST_ROOT) ;
+	use-project /boost : $(BOOST_ROOT) ;
+	alias boost_system : /boost/system//boost_system : : : <include>$(BOOST_ROOT) ;
+}
+else
+{
+	lib boost_system : : <name>boost_system : : ;
+}
+
+if (SODIUM_ROOT)
+{
+	ECHO "building libsodium from source directory: " $(SODIUM_ROOT) ;
+
+	LIBSODIUM_SRC = [ path.glob-tree $(SODIUM_ROOT)/src/libsodium : *.c
+	  : .git try.c ] ;
+
+	lib sodium
+		: # sources
+		$(LIBSODIUM_SRC)
+		: # requirements
+		<include>$(SODIUM_ROOT)/src/libsodium/include
+		<include>$(SODIUM_ROOT)/src/libsodium/include/sodium
+		<link>static
+
+		# TODO: make this conditional on architecture
+		<define>NATIVE_LITTLE_ENDIAN
+		<define>SODIUM_STATIC
+		<toolset>msvc:<define>inline=
+
+		: # default build
+
+		: # usage requirements
+		<include>$(SODIUM_ROOT)/src/libsodium/include
+		<define>SODIUM_STATIC
+		<define>SODIUM_EXPORT=
+		;
+}
+else
+{
+	lib sodium : : <name>sodium : : ;
+}
+
+ECHO "OS =" [ os.name ] ;
+
+use-project /btdht : btdht ;
+use-project /btutils : btdht/btutils ;
+use-project /miniupnpc : libminiupnpc ;
+use-project /natpmpc : libnatpmp ;
+
+lib Iphlpapi : : <name>Iphlpapi ;
+
+feature dhtd : on verbose off : composite propagated link-incompatible ;
+feature.compose <dhtd>on : <define>g_log_dht=1 <define>_DEBUG_DHT=1 ;
+feature.compose <dhtd>verbose : <define>g_log_dht=1 <define>_DEBUG_DHT_VERBOSE=1 ;
+
+feature dhti : off on : composite propagated link-incompatible ;
+feature.compose <dhti>on : <define>_DEBUG_DHT_INSTRUMENT=1 ;
+
+local usage-requirements =
+	<include>GSL/include
+	<include>include
+	<include>$(BOOST_ROOT)
+	<include>.
+	<define>GSL_THROW_ON_CONTRACT_VIOLATION
+	<define>BOOST_ASIO_HAS_STD_CHRONO
+	;
+
+lib scout
+	: # sources
+	src/dht_session.cpp
+	src/file.cpp
+	src/LoadLibraryList.cpp
+	src/scout.cpp
+	src/sockaddr.cpp
+	src/upnp-portmap.cpp
+	src/utils.cpp
+	: # requirements
+	<threading>multi
+	<library>/btdht//btdht/<link>static
+	<library>/btutils//btutils/<link>static
+	<library>/miniupnpc//miniupnpc/<link>static
+	<library>/natpmpc//natpmpc/<link>static
+	<library>boost_system
+	<library>sodium
+	<target-os>windows:<library>Iphlpapi
+	<target-os>windows:<define>_CRT_SECURE_NO_WARNINGS
+	<target-os>windows:<define>_SCL_SECURE_NO_WARNINGS
+	$(usage-requirements)
+	: # default build
+	: # usage requirements
+	$(usage-requirements)
+	;
