@@ -3,6 +3,11 @@ Adaptive Unified Reputation Algorithm (Economy)
 
 <font size=+3><u><b>Current state of project</b></u></font><br/>
 <ul>
+<li><b>30th July 2018</b><br/>
+We've finished our initial test on mDHT using entangled.<br/>
+Mobile handsets can now connect to the mDHT network to form the SWARM</br><br/>
+</li>
+
 <li><b>July 2018</b><br/>
 We are currently actively signing up ICO projects to be on the AURAE Ecosystem.<br/>
 5 DAPPs have been release for their ICO Roadshows both on Google PlayStore and Apple AppStore.<br/>
